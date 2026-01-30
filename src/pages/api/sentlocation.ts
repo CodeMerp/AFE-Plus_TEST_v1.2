@@ -101,18 +101,10 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
 
         if (calculatedStatus === 3) {
           const warningMessage = `คุณ ${takecareperson.takecare_fname} ${takecareperson.takecare_sname} \nเข้าใกล้เขตปลอดภัย ชั้นที่ 2 แล้ว`;
-          if (replyToken) await replyNotification({ 
-            replyToken, 
-            message: warningMessage,
-            bgColor: "#FFC107" // เพิ่มสีพื้นหลังเหลือง
-          });
+          if (replyToken) await replyNotification({ replyToken, message: warningMessage });
         } else if (calculatedStatus === 1) {
           const message = `คุณ ${takecareperson.takecare_fname} ${takecareperson.takecare_sname} \nออกนอกเขตปลอดภัย ชั้นที่ 1 แล้ว`;
-          if (replyToken) await replyNotification({ 
-            replyToken, 
-            message: message,
-            bgColor: "#FF9800" // เพิ่มสีพื้นหลังส้ม
-          });
+          if (replyToken) await replyNotification({ replyToken, message });
         } else if (calculatedStatus === 2) {
           const postbackMessage = `คุณ ${takecareperson.takecare_fname} ${takecareperson.takecare_sname} \nออกนอกเขตปลอดภัย ชั้นที่ 2 แล้ว`;
           if (replyToken) {
@@ -122,7 +114,6 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
               type: 'safezone',
               message: postbackMessage,
               replyToken,
-              bgColor: "#D32F2F" // เพิ่มสีพื้นหลังแดง
             });
           }
         }
