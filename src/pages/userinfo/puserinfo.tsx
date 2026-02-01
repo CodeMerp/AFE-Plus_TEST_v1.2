@@ -21,23 +21,21 @@ import { puserinfoSchema, PuserinfoFormData } from '@/components/validations/pus
 
 // 🔥 Import Hook
 import { useThaiAddress } from '@/hooks/useThaiAddress';
-
 import { encrypt } from '@/utils/helpers'
 
 interface UserData {
     isLogin: boolean;
-    data: UserDataProps | null;
+    data   : UserDataProps | null;
 }
 
 interface UserTakecareData {
-    isLogin: boolean;
-    data: UserTakecareProps | null;
+    isLogin : boolean;
+    data    : UserTakecareProps | null;
     users_id: number | null;
 }
 
 const Puserinfo = () => {
     const router = useRouter();
-
     const [alert, setAlert] = useState({ show: false, message: '' });
     const [user, setUser] = useState<UserData>({ isLogin: false, data: null })
     const [dataUser, setDataUser] = useState<UserTakecareData>({ isLogin: true, data: null, users_id: null });
@@ -48,48 +46,40 @@ const Puserinfo = () => {
     const { data, status, selected, actions, getNames, getLabel } = useThaiAddress();
 
     // 🔥 ใช้ React Hook Form
-    const {
-        register,
-        handleSubmit,
-        reset,
+    const { 
+        register, 
+        handleSubmit, 
+        reset, 
         watch,
         setValue,
         control,
-        formState: { errors, isSubmitting }
+        formState: { errors, isSubmitting, isValid, dirtyFields } // 🔥 เพิ่ม dirtyFields
     } = useForm<PuserinfoFormData>({
         resolver: zodResolver(puserinfoSchema),
         mode: "onChange",
     });
 
-    // 🔥 Sync ค่าจาก dropdown ไปยัง form
-    useEffect(() => {
-        if (selected.provinceId) {
-            setValue('takecare_province', getNames.getProvinceName(selected.provinceId));
-        }
-        if (selected.districtId) {
-            setValue('takecare_amphur', getNames.getDistrictName(selected.districtId));
-        }
-        if (selected.subDistrictId) {
-            setValue('takecare_tubon', getNames.getSubDistrictName(selected.subDistrictId));
-        }
-        if (selected.zipCode) {
-            setValue('takecare_postcode', selected.zipCode);
-        }
-    }, [selected, setValue, getNames]);
+    // ❌ ลบ useEffect ที่ใช้ Sync ค่าเดิมออกแล้ว
 
-    // 🔥 ฟังก์ชันเช็คว่าควรขึ้น "สีเขียว" หรือไม่
+    // 🔥 ฟังก์ชันเช็คว่าควรขึ้น "สีเขียว" หรือไม่ (รวมเช็ค Date/Number และ Dirty)
     const isFieldValid = (name: keyof PuserinfoFormData) => {
         const value = watch(name);
-        if (name === 'takecare_birthday' || name === 'gender_id' || name === 'marry_id') {
-            return !errors[name] && !!value;
-        }
-        return !errors[name] && !!value && value.toString().trim() !== "";
+        const hasError = !!errors[name];
+        const isDirty = dirtyFields[name];
+
+        if (hasError) return false;
+        if (!isDirty) return false; // ถ้าไม่ได้แก้ ไม่ต้องเขียว
+
+        if (value === undefined || value === null) return false;
+        if (typeof value === 'string' && value.trim() === '') return false;
+        
+        return true;
     };
 
     useEffect(() => {
         getMasterData()
         const auToken = router.query.auToken
-
+        
         if (auToken && typeof auToken === 'string') {
             const fetchUserData = async () => {
                 try {
@@ -97,10 +87,10 @@ const Puserinfo = () => {
                     if (responseUser.data?.data) {
                         const encodedUsersId = encrypt(responseUser.data?.data.users_id.toString());
                         const responseTakecareperson = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUserTakecareperson/${encodedUsersId}`);
+                    
                         const takecareData = responseTakecareperson.data?.data;
-
-                        if (takecareData) {
-                            // 🔥 ใช้ reset เพื่อกำหนดค่าเริ่มต้นให้กับ form
+                        
+                        if(takecareData){
                             reset({
                                 takecare_fname: takecareData.takecare_fname,
                                 takecare_sname: takecareData.takecare_sname,
@@ -119,7 +109,7 @@ const Puserinfo = () => {
                                 takecare_drug: takecareData.takecare_drug,
                             });
                         }
-
+                        
                         setDataUser({ isLogin: false, data: takecareData, users_id: responseUser.data?.data.users_id })
                         setUser({ isLogin: false, data: responseUser.data?.data })
                     } else {
@@ -133,7 +123,6 @@ const Puserinfo = () => {
                     setAlert({ show: true, message: 'ระบบไม่สามารถดึงข้อมูลของท่านได้ กรุณาลองใหม่อีกครั้ง' })
                 }
             };
-
             fetchUserData();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -172,46 +161,45 @@ const Puserinfo = () => {
 
     const onSubmit = async (formData: PuserinfoFormData) => {
         try {
-            if (!dataUser.data) {
+            if(!dataUser.data){
                 setAlert({ show: true, message: 'ไม่พบข้อมูลผู้สูงอายุ' })
                 return;
             }
 
             const data = {
-                takecare_fname: formData.takecare_fname,
-                takecare_sname: formData.takecare_sname,
+                takecare_fname   : formData.takecare_fname,
+                takecare_sname   : formData.takecare_sname,
                 takecare_birthday: formData.takecare_birthday,
-                gender_id: formData.gender_id,
-                marry_id: formData.marry_id,
-                takecare_number: formData.takecare_number,
-                takecare_moo: formData.takecare_moo,
-                takecare_road: formData.takecare_road,
-                takecare_tubon: formData.takecare_tubon,
-                takecare_amphur: formData.takecare_amphur,
+                gender_id        : formData.gender_id,
+                marry_id         : formData.marry_id,
+                takecare_number  : formData.takecare_number,
+                takecare_moo     : formData.takecare_moo,
+                takecare_road    : formData.takecare_road,
+                takecare_tubon   : formData.takecare_tubon,
+                takecare_amphur  : formData.takecare_amphur,
                 takecare_province: formData.takecare_province,
                 takecare_postcode: formData.takecare_postcode,
-                takecare_tel1: formData.takecare_tel1,
-                takecare_disease: formData.takecare_disease,
-                takecare_drug: formData.takecare_drug,
+                takecare_tel1    : formData.takecare_tel1,
+                takecare_disease : formData.takecare_disease,
+                takecare_drug    : formData.takecare_drug,
             }
 
             const encodedUsersId = encrypt(dataUser.data.takecare_id.toString());
             await axios.post(`${process.env.WEB_DOMAIN}/api/user/updateUserTakecare/${encodedUsersId}`, data)
-
-            // Reload data
+            
             if (router.query.auToken && typeof router.query.auToken === 'string') {
                 const responseUser = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUser/${router.query.auToken}`);
                 if (responseUser.data?.data) {
                     const encodedUsersId = encrypt(responseUser.data?.data.users_id.toString());
                     const responseTakecareperson = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUserTakecareperson/${encodedUsersId}`);
-                    setDataUser({
-                        isLogin: false,
-                        data: responseTakecareperson.data?.data,
-                        users_id: responseUser.data?.data.users_id
+                    setDataUser({ 
+                        isLogin: false, 
+                        data: responseTakecareperson.data?.data, 
+                        users_id: responseUser.data?.data.users_id 
                     });
                 }
             }
-
+            
             setAlert({ show: true, message: 'บันทึกข้อมูลสำเร็จ' })
 
         } catch (error) {
@@ -229,11 +217,11 @@ const Puserinfo = () => {
             </div>
             <div className="px-5">
                 <Form noValidate onSubmit={handleSubmit(onSubmit)}>
-
-                    <InputLabel
-                        label="ชื่อ"
-                        id="takecare_fname"
-                        placeholder="กรอกชื่อ"
+                    
+                    <InputLabel 
+                        label="ชื่อ" 
+                        id="takecare_fname" 
+                        placeholder="กรอกชื่อ" 
                         {...register("takecare_fname")}
                         isInvalid={!!errors.takecare_fname}
                         errorMessage={errors.takecare_fname?.message}
@@ -241,10 +229,10 @@ const Puserinfo = () => {
                         required
                     />
 
-                    <InputLabel
-                        label="นามสกุล"
-                        id="takecare_sname"
-                        placeholder="กรอกนามสกุล"
+                    <InputLabel 
+                        label="นามสกุล" 
+                        id="takecare_sname" 
+                        placeholder="กรอกนามสกุล" 
                         {...register("takecare_sname")}
                         isInvalid={!!errors.takecare_sname}
                         errorMessage={errors.takecare_sname?.message}
@@ -258,9 +246,9 @@ const Puserinfo = () => {
                             name="takecare_birthday"
                             control={control}
                             render={({ field }) => (
-                                <DatePickerX
-                                    selected={field.value}
-                                    onChange={(date) => field.onChange(date)}
+                                <DatePickerX 
+                                    selected={field.value} 
+                                    onChange={(date) => field.onChange(date)} 
                                 />
                             )}
                         />
@@ -287,7 +275,7 @@ const Puserinfo = () => {
                                             value={genderId}
                                             checked={watch("gender_id") === genderId}
                                             onChange={(e) => {
-                                                setValue("gender_id", Number(e.target.value), { shouldValidate: true });
+                                                setValue("gender_id", Number(e.target.value), { shouldValidate: true, shouldDirty: true });
                                             }}
                                         />
                                     )
@@ -318,7 +306,7 @@ const Puserinfo = () => {
                                             value={marryId}
                                             checked={watch("marry_id") === marryId}
                                             onChange={(e) => {
-                                                setValue("marry_id", Number(e.target.value), { shouldValidate: true });
+                                                setValue("marry_id", Number(e.target.value), { shouldValidate: true, shouldDirty: true });
                                             }}
                                         />
                                     )
@@ -332,33 +320,33 @@ const Puserinfo = () => {
                         )}
                     </Form.Group>
 
-                    <InputLabel
-                        label="เลขที่บ้าน"
-                        id="takecare_number"
-                        placeholder="123/12"
+                    <InputLabel 
+                        label="เลขที่บ้าน" 
+                        id="takecare_number" 
+                        placeholder="123/12" 
                         max={10}
                         {...register("takecare_number")}
                         isValid={isFieldValid("takecare_number")}
                     />
 
-                    <InputLabel
-                        label="หมู่"
-                        id="takecare_moo"
-                        placeholder="1"
+                    <InputLabel 
+                        label="หมู่" 
+                        id="takecare_moo" 
+                        placeholder="1" 
                         max={5}
                         {...register("takecare_moo")}
                         isValid={isFieldValid("takecare_moo")}
                     />
 
-                    <InputLabel
-                        label="ถนน"
-                        id="takecare_road"
+                    <InputLabel 
+                        label="ถนน" 
+                        id="takecare_road" 
                         placeholder="-"
                         {...register("takecare_road")}
                         isValid={isFieldValid("takecare_road")}
                     />
 
-                    {/* 🔥 Dropdown สำหรับที่อยู่ */}
+                    {/* 🔥 Dropdown สำหรับที่อยู่ (แก้ไขใหม่) */}
                     {status.loading ? (
                         <p className="text-muted">กำลังโหลดข้อมูลจังหวัด...</p>
                     ) : (
@@ -366,29 +354,24 @@ const Puserinfo = () => {
                             <input type="hidden" {...register("takecare_province")} />
                             <input type="hidden" {...register("takecare_amphur")} />
                             <input type="hidden" {...register("takecare_tubon")} />
-
+                            
                             <SelectAddress
                                 label="จังหวัด"
                                 id="takecare_province"
                                 value={selected.provinceId}
                                 options={data.provinces}
                                 onChange={(id) => {
-                                    actions.setProvince(id); // 1. อัปเดต State
+                                    actions.setProvince(id); 
                                     const name = getNames.getProvinceName(id);
+                                    
+                                    setValue("takecare_province", name, { shouldValidate: true, shouldDirty: true });
 
-                                    // 2. อัปเดตค่าจังหวัดและสั่ง Validate
-                                    setValue("takecare_province", name, { shouldValidate: true });
-
-                                    // 3. ถ้าเลือกค่าว่าง (— เลือกจังหวัด —) ให้ล้างลูกข่ายทั้งหมดรวมถึงรหัสไปรษณีย์
-                                    if (!id) {
-                                        setValue("takecare_amphur", "", { shouldValidate: true });
-                                        setValue("takecare_tubon", "", { shouldValidate: true });
-
-                                        // 🔥🔥 ต้องสั่งล้างรหัสไปรษณีย์ตรงนี้ด้วยครับ ค่าถึงจะหายไป 🔥🔥
-                                        setValue("takecare_postcode", "", { shouldValidate: true });
-                                    }
+                                    // ถ้าเปลี่ยนจังหวัด หรือ เลือกค่าว่าง -> ล้างลูกข่ายทั้งหมด
+                                    setValue("takecare_amphur", "", { shouldValidate: true, shouldDirty: true });
+                                    setValue("takecare_tubon", "", { shouldValidate: true, shouldDirty: true });
+                                    setValue("takecare_postcode", "", { shouldValidate: true, shouldDirty: true });
                                 }}
-                                // ... props อื่นๆ เหมือนเดิม
+                                disabled={status.loading || !!status.error}
                                 placeholder="เลือกจังหวัด"
                                 isInvalid={!!errors.takecare_province}
                                 errorMessage={errors.takecare_province?.message}
@@ -405,13 +388,11 @@ const Puserinfo = () => {
                                 onChange={(id) => {
                                     actions.setDistrict(id);
                                     const name = getNames.getDistrictName(id);
-                                    setValue("takecare_amphur", name, { shouldValidate: true });
+                                    setValue("takecare_amphur", name, { shouldValidate: true, shouldDirty: true });
 
-                                    // ถ้าเลือกค่าว่าง ให้ล้างตำบลและรหัสไปรษณีย์
-                                    if (!id) {
-                                        setValue("takecare_tubon", "", { shouldValidate: true });
-                                        setValue("takecare_postcode", "", { shouldValidate: true });
-                                    }
+                                    // ถ้าเปลี่ยนอำเภอ -> ล้างตำบลและไปรษณีย์
+                                    setValue("takecare_tubon", "", { shouldValidate: true, shouldDirty: true });
+                                    setValue("takecare_postcode", "", { shouldValidate: true, shouldDirty: true });
                                 }}
                                 disabled={!selected.provinceId}
                                 placeholder={!selected.provinceId ? "เลือกจังหวัดก่อน" : "เลือกอำเภอ"}
@@ -430,12 +411,12 @@ const Puserinfo = () => {
                                 onChange={(id) => {
                                     actions.setSubDistrict(id);
                                     const name = getNames.getSubDistrictName(id);
-                                    setValue("takecare_tubon", name, { shouldValidate: true });
+                                    setValue("takecare_tubon", name, { shouldValidate: true, shouldDirty: true });
 
                                     // ดึงรหัสไปรษณีย์ทันที
                                     const subDist = data.subDistricts.find(s => s.id === Number(id));
                                     const zipCode = subDist?.zip_code ? String(subDist.zip_code) : "";
-                                    setValue("takecare_postcode", zipCode, { shouldValidate: true });
+                                    setValue("takecare_postcode", zipCode, { shouldValidate: true, shouldDirty: true });
                                 }}
                                 disabled={!selected.districtId}
                                 placeholder={!selected.districtId ? "เลือกอำเภอก่อน" : "เลือกตำบล"}
@@ -448,10 +429,10 @@ const Puserinfo = () => {
                         </>
                     )}
 
-                    <InputLabel
-                        label="รหัสไปรษณีย์"
-                        id="takecare_postcode"
-                        placeholder="รหัสไปรษณีย์จะถูกกรอกอัตโนมัติ"
+                    <InputLabel 
+                        label="รหัสไปรษณีย์" 
+                        id="takecare_postcode" 
+                        placeholder="รหัสไปรษณีย์จะถูกกรอกอัตโนมัติ" 
                         type="tel"
                         max={5}
                         {...register("takecare_postcode")}
@@ -462,10 +443,10 @@ const Puserinfo = () => {
                         required
                     />
 
-                    <InputLabel
-                        label="เบอร์โทรศัพท์"
-                        id="takecare_tel1"
-                        placeholder="กรอกเบอร์โทรศัพท์"
+                    <InputLabel 
+                        label="เบอร์โทรศัพท์" 
+                        id="takecare_tel1" 
+                        placeholder="กรอกเบอร์โทรศัพท์" 
                         type="tel"
                         max={10}
                         {...register("takecare_tel1")}
@@ -475,29 +456,29 @@ const Puserinfo = () => {
                         required
                     />
 
-                    <InputLabel
-                        label="โรคประจำตัว"
-                        id="takecare_disease"
+                    <InputLabel 
+                        label="โรคประจำตัว" 
+                        id="takecare_disease" 
                         placeholder="กรอกโรคประจำตัว"
                         {...register("takecare_disease")}
                         isValid={isFieldValid("takecare_disease")}
                     />
 
-                    <InputLabel
-                        label="ยาที่ใช้ประจำ"
-                        id="takecare_drug"
+                    <InputLabel 
+                        label="ยาที่ใช้ประจำ" 
+                        id="takecare_drug" 
                         placeholder="กรอกยาที่ใช้ประจำ"
                         {...register("takecare_drug")}
                         isValid={isFieldValid("takecare_drug")}
                     />
 
                     <Form.Group className="d-flex justify-content-center py-3">
-                        <ButtonState
-                            type="submit"
-                            className={styles.button}
-                            text={'บันทึก'}
-                            icon="fas fa-save"
-                            isLoading={isSubmitting}
+                        <ButtonState 
+                            type="submit" 
+                            className={styles.button} 
+                            text={'บันทึก'} 
+                            icon="fas fa-save" 
+                            isLoading={isSubmitting} 
                         />
                     </Form.Group>
                 </Form>
