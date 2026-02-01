@@ -78,8 +78,7 @@ const ElderlyRegistration = () => {
         mode: "onChange",
         defaultValues: {
             takecare_birthday: new Date(),
-            gender_id: 1,
-            marry_id: 1,
+            // ไม่ต้องกำหนด gender_id และ marry_id เพื่อให้ผู้ใช้เลือกเอง
         }
     });
 
