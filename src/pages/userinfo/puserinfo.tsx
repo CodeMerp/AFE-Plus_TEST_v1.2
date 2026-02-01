@@ -372,8 +372,24 @@ const Puserinfo = () => {
                                 id="takecare_province"
                                 value={selected.provinceId}
                                 options={data.provinces}
-                                onChange={actions.setProvince}
-                                disabled={status.loading || !!status.error}
+                                onChange={(id) => {
+                                    // 1. อัปเดต State ใน useThaiAddress Hook เพื่อล้าง Dropdown อำเภอ/ตำบล 
+                                    actions.setProvince(id);
+
+                                    // 2. ดึงชื่อจังหวัด (ถ้าเลือกค่าว่าง name จะเป็น "") [cite: 213]
+                                    const name = getNames.getProvinceName(id);
+
+                                    // 3. อัปเดตค่าจังหวัดเข้า Form และสั่ง Validate ทันที 
+                                    setValue("takecare_province", name, { shouldValidate: true });
+
+                                    // 🔥 4. ถ้าเลือกเป็นค่าว่าง (— เลือกจังหวัด —) ให้ล้างค่าที่เหลือใน Form ทั้งหมด
+                                    if (!id) {
+                                        // สั่งล้างค่าและ Validate ทันทีเพื่อให้ขึ้นสีแดงและหายเขียว [cite: 10, 76]
+                                        setValue("takecare_amphur", "", { shouldValidate: true });
+                                        setValue("takecare_tubon", "", { shouldValidate: true });
+                                        setValue("takecare_postcode", "", { shouldValidate: true });
+                                    }
+                                }}
                                 placeholder="เลือกจังหวัด"
                                 isInvalid={!!errors.takecare_province}
                                 errorMessage={errors.takecare_province?.message}
@@ -387,7 +403,11 @@ const Puserinfo = () => {
                                 id="takecare_amphur"
                                 value={selected.districtId}
                                 options={data.districts}
-                                onChange={actions.setDistrict}
+                                onChange={(id) => {
+                                    actions.setDistrict(id);
+                                    const name = getNames.getDistrictName(id);
+                                    setValue("takecare_amphur", name, { shouldValidate: true });
+                                }}
                                 disabled={!selected.provinceId}
                                 placeholder={!selected.provinceId ? "เลือกจังหวัดก่อน" : "เลือกอำเภอ"}
                                 isInvalid={!!errors.takecare_amphur}
@@ -402,7 +422,15 @@ const Puserinfo = () => {
                                 id="takecare_tubon"
                                 value={selected.subDistrictId}
                                 options={data.subDistricts}
-                                onChange={actions.setSubDistrict}
+                                onChange={(id) => {
+                                    actions.setSubDistrict(id);
+                                    const name = getNames.getSubDistrictName(id);
+                                    setValue("takecare_tubon", name, { shouldValidate: true });
+
+                                    // ดึงรหัสไปรษณีย์จากข้อมูลตำบลมาใส่ในฟอร์มทันที [cite: 219]
+                                    const subDist = data.subDistricts.find(s => s.id === Number(id));
+                                    setValue("takecare_postcode", subDist?.zip_code ? String(subDist.zip_code) : "", { shouldValidate: true });
+                                }}
                                 disabled={!selected.districtId}
                                 placeholder={!selected.districtId ? "เลือกอำเภอก่อน" : "เลือกตำบล"}
                                 isInvalid={!!errors.takecare_tubon}
