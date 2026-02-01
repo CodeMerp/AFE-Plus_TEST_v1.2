@@ -175,7 +175,7 @@ const Registration = () => {
                         <InputLabel label="รหัสไปรษณีย์" id="users_postcode" placeholder="กรอกรหัสไปรษณีย์" type="number" max={5} defaultValue={dataUser.data?.users_postcode || ''} disabled={dataUser.data ? true : false} />
                     </Form.Group>
                     <Form.Group>
-                        <InputLabel label="เบอร์โทรศัพท์" id="users_tel1" placeholder="กรอกเบอร์โทรศัพท์" max={12} defaultValue={dataUser.data?.users_tel1 || ''} disabled={dataUser.data ? true : false} />
+                        <InputLabel label="เบอร์โทรศัพท์" id="users_tel1" placeholder="กรอกเบอร์โทรศัพท์" type="number" max={10} defaultValue={dataUser.data?.users_tel1 || ''} disabled={dataUser.data ? true : false} />
                     </Form.Group>
                     {
                         !dataUser.data && (

@@ -252,7 +252,7 @@ const ElderlyRegistration = () => {
                         <InputLabel label="รหัสไปรษณีย์" id="takecare_postcode" placeholder="กรอกรหัสไปรษณีย์" max={5} type="number" defaultValue={dataUser.data?.takecare_postcode || ''} disabled={dataUser.data ? true : false} />
                     </Form.Group>
                     <Form.Group>
-                        <InputLabel label="เบอร์โทรศัพท์" id="takecare_tel1" placeholder="กรอกเบอร์โทรศัพท์" max={12} defaultValue={dataUser.data?.takecare_tel1 || ''} disabled={dataUser.data ? true : false} />
+                        <InputLabel label="เบอร์โทรศัพท์" id="takecare_tel1" placeholder="กรอกเบอร์โทรศัพท์" max={10} type="number" defaultValue={dataUser.data?.takecare_tel1 || ''} disabled={dataUser.data ? true : false} />
                     </Form.Group>
                     <Form.Group>
                         <InputLabel label="โรคประจำตัว" id="takecare_disease" placeholder="กรอกโรคประจำตัว" defaultValue={dataUser.data?.takecare_disease || ''} disabled={dataUser.data ? true : false} />
