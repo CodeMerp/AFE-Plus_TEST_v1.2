@@ -30,8 +30,7 @@ const sortByName = <T extends { name_th?: string }>(list: T[] = []): T[] =>
 
 const getLabel = (item: Province | District | SubDistrict | null): string => {
   if (!item) return "";
-  const { name_th, name_en } = item;
-  return name_th && name_en ? `${name_th} — ${name_en}` : name_th || name_en;
+  return item.name_th || ""; // แสดงเฉพาะภาษาไทย
 };
 
 // --- Custom Hook (Logic Layer) ---
