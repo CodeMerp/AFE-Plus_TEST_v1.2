@@ -230,6 +230,7 @@ const Registration = () => {
                         isInvalid={!!errors.users_fname}
                         errorMessage={errors.users_fname?.message}
                         isValid={isFieldValid("users_fname")}
+                        required
                     />
 
                     <InputLabel 
@@ -241,6 +242,7 @@ const Registration = () => {
                         isInvalid={!!errors.users_sname}
                         errorMessage={errors.users_sname?.message}
                         isValid={isFieldValid("users_sname")}
+                        required
                     />
 
                     {
@@ -255,6 +257,7 @@ const Registration = () => {
                                     isInvalid={!!errors.users_passwd}
                                     errorMessage={errors.users_passwd?.message}
                                     isValid={isFieldValid("users_passwd")}
+                                    required
                                 />
                                 <InputLabel 
                                     label="รหัสผ่าน (อีกครั้ง)" 
@@ -265,6 +268,7 @@ const Registration = () => {
                                     isInvalid={!!errors.users_passwd_comfirm}
                                     errorMessage={errors.users_passwd_comfirm?.message}
                                     isValid={isFieldValid("users_passwd_comfirm")}
+                                    required
                                 />
                             </>
                         )
@@ -281,6 +285,7 @@ const Registration = () => {
                         isInvalid={!!errors.users_pin}
                         errorMessage={errors.users_pin?.message}
                         isValid={isFieldValid("users_pin")}
+                        required
                     />
 
                     <InputLabel 
@@ -372,6 +377,7 @@ const Registration = () => {
                         errorMessage={errors.users_postcode?.message}
                         isValid={isFieldValid("users_postcode")}
                         readOnly // 🔥 ทำให้เป็น read-only เพราะจะถูกกรอกอัตโนมัติ
+                        required
                     />
                     
                     <InputLabel 
@@ -385,6 +391,7 @@ const Registration = () => {
                         isInvalid={!!errors.users_tel1}
                         errorMessage={errors.users_tel1?.message}
                         isValid={isFieldValid("users_tel1")}
+                        required
                     />
 
                     {

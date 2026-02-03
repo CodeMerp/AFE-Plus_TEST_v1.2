@@ -15,22 +15,46 @@ export const zipCodeRule = z
 
 // --- 2. Schema หลัก ---
 export const registrationSchema = z.object({
-  users_fname: z.string().min(1, "กรุณากรอกชื่อ"),
-  users_sname: z.string().min(1, "กรุณากรอกนามสกุล"),
-  
-  users_passwd: z.string().optional(),
-  users_passwd_comfirm: z.string().optional(),
-  
-  users_pin: z.string()
+  users_fname: z.string({
+    required_error: "กรุณากรอกชื่อ",
+  }).min(1, "กรุณากรอกชื่อ"),
+
+  users_sname: z.string({
+    required_error: "กรุณากรอกนามสกุล",
+  }).min(1, "กรุณากรอกนามสกุล"),
+
+  users_passwd: z.string({
+    required_error: "กรุณากรอกรหัสผ่าน"
+  })
+  .min(1, "กรุณากรอกรหัสผ่าน"),
+
+  users_passwd_comfirm: z.string({
+    required_error: "กรุณากรอกรหัสผ่านอีกครั้ง"
+  })
+  .min(1, "กรุณากรอกรหัสผ่าน"),
+
+  users_pin: z.string({
+    required_error: "กรุณากรอก PIN",
+  })
+    .min(1, "กรุณากรอก PIN")
     .length(4, "PIN ต้องมี 4 หลัก")
     .regex(/^[0-9]+$/, "ต้องเป็นตัวเลขเท่านั้น"),
 
   users_number: z.string().optional(),
   users_moo: z.string().optional(),
   users_road: z.string().optional(),
-  users_tubon: z.string().min(1, "กรุณากรอกตำบล"),
-  users_amphur: z.string().min(1, "กรุณากรอกอำเภอ"),
-  users_province: z.string().min(1, "กรุณากรอกจังหวัด"),
+
+  users_tubon: z.string({
+    required_error: "กรุณาเลือกตำบล",
+  }).min(1, "กรุณาเลือกตำบล"),
+
+  users_amphur: z.string({
+    required_error: "กรุณาเลือกอำเภอ",
+  }).min(1, "กรุณาเลือกอำเภอ"),
+
+  users_province: z.string({
+    required_error: "กรุณาเลือกจังหวัด",
+  }).min(1, "กรุณาเลือกจังหวัด"),
 
   users_postcode: zipCodeRule, 
   users_tel1: phoneRule,
