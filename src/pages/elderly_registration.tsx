@@ -482,7 +482,6 @@ const ElderlyRegistration = () => {
                         disabled={!!dataUser.data}
                         {...register("takecare_tel1")}
                         isInvalid={!!errors.takecare_tel1}
-                        errorMessage={errors.takecare_tel1?.message}
                         isValid={isFieldValid("takecare_tel1")}
                     />
 
